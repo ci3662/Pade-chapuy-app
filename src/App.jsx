@@ -58,3 +58,16 @@ const reservarTurno = async (hora) => {
     }
   }
 };
+useEffect(() => {
+  if (fechaSeleccionada) {
+    const fetchReservas = async () => {
+      const doc = await db.collection("reservas").doc(fechaSeleccionada).get();
+      if (doc.exists) {
+        setReservas(doc.data());
+      } else {
+        setReservas({});
+      }
+    };
+    fetchReservas();
+  }
+}, [fechaSeleccionada]);
