@@ -22,24 +22,39 @@ const reservarTurno = async (hora) => {
     return;
   }
 
-  const nombre = prompt(
-    `Reservar turno de ${hora} el ${fechaSeleccionada}\n\nIngrese su nombre y apellido:`
-  );
+  const nombre = prompt(`Reservar turno de ${hora} el ${fechaSeleccionada}\n\nIngrese su nombre y apellido:`);
+
   if (nombre) {
     const clave = `${fechaSeleccionada}_${hora}`;
-    const nuevaReserva = { ...reservas, [clave]: nombre };
 
-    // Guardar en Firestore
-    await db.collection("reservas").doc(fechaSeleccionada).set(nuevaReserva);
+    try {
+      // Traer reservas existentes
+      const reservaDoc = await db.collection("reservas").doc(fechaSeleccionada).get();
+      let reservasExistentes = {};
 
-    setReservas(nuevaReserva);
-    alert(`¡Turno reservado para ${nombre} el ${fechaSeleccionada} a las ${hora}!`);
+      if (reservaDoc.exists) {
+        reservasExistentes = reservaDoc.data();
+      }
 
-    // Plantilla formal para WhatsApp
-    const mensaje = `Hola, mi nombre es ${nombre}. He realizado una reserva para jugar al pádel el día ${fechaSeleccionada} a las ${hora} hs. ¡Muchas gracias!`;
-    const url = `https://wa.me/5493476608590?text=${encodeURIComponent(mensaje)}`;
+      // Agregar la nueva reserva
+      reservasExistentes[clave] = nombre;
 
-    // Redirigir a WhatsApp
-    window.open(url, "_blank");
+      // Guardar en Firestore
+      await db.collection("reservas").doc(fechaSeleccionada).set(reservasExistentes);
+
+      setReservas(reservasExistentes);
+
+      alert(`¡Turno reservado para ${nombre} el ${fechaSeleccionada} a las ${hora}!`);
+
+      // Enviar WhatsApp
+      const mensaje = `Hola, mi nombre es ${nombre}. He realizado una reserva para jugar al pádel el día ${fechaSeleccionada} a las ${hora} hs. ¡Muchas gracias!`;
+      const url = `https://wa.me/5493476608590?text=${encodeURIComponent(mensaje)}`;
+
+      window.open(url, "_blank");
+
+    } catch (error) {
+      console.error("Error reservando turno:", error);
+      alert("Hubo un error, por favor intentá de nuevo.");
+    }
   }
 };
