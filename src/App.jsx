@@ -13,28 +13,50 @@ const horarios = [
 ];
 
 export default function App() {
+  const [fechaSeleccionada, setFechaSeleccionada] = useState("");
   const [reservas, setReservas] = useState({});
 
   const reservarTurno = (hora) => {
-    const nombre = prompt(`Reservar turno de ${hora}\n\nIngrese su nombre y apellido:`);
+    if (!fechaSeleccionada) {
+      alert("Por favor seleccioná una fecha antes de reservar.");
+      return;
+    }
+
+    const nombre = prompt(`Reservar turno de ${hora} el ${fechaSeleccionada}\n\nIngrese su nombre y apellido:`);
     if (nombre) {
-      setReservas(prev => ({ ...prev, [hora]: nombre }));
-      alert(`¡Turno reservado para ${nombre} a las ${hora}!`);
-      // Acá después podemos agregar envío a Firebase o WhatsApp
+      const clave = `${fechaSeleccionada}_${hora}`;
+      setReservas(prev => ({ ...prev, [clave]: nombre }));
+      alert(`¡Turno reservado para ${nombre} el ${fechaSeleccionada} a las ${hora}!`);
+      // Después podemos guardar en Firebase o enviar WhatsApp
     }
   };
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Reserva de Turnos - Padel Chapuy</h1>
+
+      <div style={{ marginBottom: 20 }}>
+        <label>
+          Seleccionar fecha:{" "}
+          <input
+            type="date"
+            value={fechaSeleccionada}
+            onChange={(e) => setFechaSeleccionada(e.target.value)}
+          />
+        </label>
+      </div>
+
       <ul style={{ listStyle: "none", padding: 0 }}>
-        {horarios.map(hora => (
-          <li key={hora} style={{ margin: "10px 0" }}>
-            <strong>{hora}</strong> - {reservas[hora] ? `Reservado por ${reservas[hora]}` : (
-              <button onClick={() => reservarTurno(hora)}>Reservar</button>
-            )}
-          </li>
-        ))}
+        {horarios.map(hora => {
+          const clave = `${fechaSeleccionada}_${hora}`;
+          return (
+            <li key={hora} style={{ margin: "10px 0" }}>
+              <strong>{hora}</strong> - {reservas[clave] ? `Reservado por ${reservas[clave]}` : (
+                <button onClick={() => reservarTurno(hora)}>Reservar</button>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
