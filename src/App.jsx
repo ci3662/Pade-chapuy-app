@@ -16,48 +16,30 @@ export default function App() {
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
   const [reservas, setReservas] = useState({});
 
-  const reservarTurno = (hora) => {
-    if (!fechaSeleccionada) {
-      alert("Por favor seleccioná una fecha antes de reservar.");
-      return;
-    }
+const reservarTurno = async (hora) => {
+  if (!fechaSeleccionada) {
+    alert("Por favor seleccioná una fecha antes de reservar.");
+    return;
+  }
 
-    const nombre = prompt(`Reservar turno de ${hora} el ${fechaSeleccionada}\n\nIngrese su nombre y apellido:`);
-    if (nombre) {
-      const clave = `${fechaSeleccionada}_${hora}`;
-      setReservas(prev => ({ ...prev, [clave]: nombre }));
-      alert(`¡Turno reservado para ${nombre} el ${fechaSeleccionada} a las ${hora}!`);
-      // Después podemos guardar en Firebase o enviar WhatsApp
-    }
-  };
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Reserva de Turnos - Padel Chapuy</h1>
-
-      <div style={{ marginBottom: 20 }}>
-        <label>
-          Seleccionar fecha:{" "}
-          <input
-            type="date"
-            value={fechaSeleccionada}
-            onChange={(e) => setFechaSeleccionada(e.target.value)}
-          />
-        </label>
-      </div>
-
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {horarios.map(hora => {
-          const clave = `${fechaSeleccionada}_${hora}`;
-          return (
-            <li key={hora} style={{ margin: "10px 0" }}>
-              <strong>{hora}</strong> - {reservas[clave] ? `Reservado por ${reservas[clave]}` : (
-                <button onClick={() => reservarTurno(hora)}>Reservar</button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+  const nombre = prompt(
+    `Reservar turno de ${hora} el ${fechaSeleccionada}\n\nIngrese su nombre y apellido:`
   );
-}
+  if (nombre) {
+    const clave = `${fechaSeleccionada}_${hora}`;
+    const nuevaReserva = { ...reservas, [clave]: nombre };
+
+    // Guardar en Firestore
+    await db.collection("reservas").doc(fechaSeleccionada).set(nuevaReserva);
+
+    setReservas(nuevaReserva);
+    alert(`¡Turno reservado para ${nombre} el ${fechaSeleccionada} a las ${hora}!`);
+
+    // Plantilla formal para WhatsApp
+    const mensaje = `Hola, mi nombre es ${nombre}. He realizado una reserva para jugar al pádel el día ${fechaSeleccionada} a las ${hora} hs. ¡Muchas gracias!`;
+    const url = `https://wa.me/5493476608590?text=${encodeURIComponent(mensaje)}`;
+
+    // Redirigir a WhatsApp
+    window.open(url, "_blank");
+  }
+};
