@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { db } from './firebase';
 
 const horarios = [
   "09:00",
