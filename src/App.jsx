@@ -48,7 +48,7 @@ const reservarTurno = async (hora) => {
 
       // Enviar WhatsApp
       const mensaje = `Hola, mi nombre es ${nombre}. He realizado una reserva para jugar al pádel el día ${fechaSeleccionada} a las ${hora} hs. ¡Muchas gracias!`;
-      const url = `https://wa.me/5493476608590?text=${encodeURIComponent(mensaje)}`;
+      const url =https://wa.me/5493476608590?text=Reserva%20de%20turno%20-%20Nombre%20y%20Apellido:%20[Nombre%20que%20puso] ;
 
       window.open(url, "_blank");
 
